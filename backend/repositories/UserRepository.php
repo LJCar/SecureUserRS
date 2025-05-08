@@ -66,4 +66,38 @@ class UserRepository implements UserRepositoryInterface
         $stmt->close();
         return $result;
     }
+
+    public function usernameExists(string $username): bool
+    {
+        $stmt = $this->conn->prepare("SELECT 1 FROM users WHERE username = ? LIMIT 1");
+        if (!$stmt) {
+            error_log('usernameExists failed: ' . $this->conn->error);
+            return false;
+        }
+
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $stmt->store_result();
+        $exists = $stmt->num_rows > 0;
+        $stmt->close();
+
+        return $exists;
+    }
+
+    public function emailExists(string $email): bool
+    {
+        $stmt = $this->conn->prepare("SELECT 1 FROM users WHERE email = ? LIMIT 1");
+        if (!$stmt) {
+            error_log('emailExists failed: ' . $this->conn->error);
+            return false;
+        }
+
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $stmt->store_result();
+        $exists = $stmt->num_rows > 0;
+        $stmt->close();
+
+        return $exists;
+    }
 }
