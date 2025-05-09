@@ -13,3 +13,5 @@ if (!$conn) {
     error_log('DB connection error: ' . mysqli_connect_error());
     die('Service unavailable, please try again later.');
 }
+
+return $conn;

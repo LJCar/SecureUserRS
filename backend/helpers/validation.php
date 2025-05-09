@@ -1,64 +1,60 @@
 <?php
 
-function validateUsername(string &$username): ?string {
+function validateUsername(string $username): ?string {
     $username = strtolower(trim($username));
 
     if ($username === '') {
-        return 'Username is required.';
+        return 'Username is required';
     }
 
     if (strlen($username) < 3 || strlen($username) > 20) {
-        return 'Username must be between 3 and 20 characters.';
+        return 'Username must be between 3 and 20 characters';
     }
 
     if (preg_match('/\s/', $username)) {
-        return 'Username cannot contain spaces.';
+        return 'Username cannot contain spaces';
     }
 
     if (!preg_match('/^[a-zA-Z0-9._]+$/', $username)) {
-        return 'Username can only contain letters, numbers, dots, or underscores.';
+        return 'Username can only contain letters, numbers, dots, or underscores';
     }
 
     if (preg_match('/^[._]/', $username) || preg_match('/[._]$/', $username)) {
-        return 'Username cannot start or end with a dot or underscore.';
+        return 'Username cannot start or end with a dot or underscore';
     }
 
     if (preg_match('/[._]{2,}/', $username)) {
-        return 'Username cannot contain consecutive dots or underscores.';
+        return 'Username cannot contain consecutive dots or underscores';
     }
 
     $reserved = ['admin', 'root', 'support', 'system', 'help', 'login', 'register'];
     if (in_array($username, $reserved)) {
-        return 'This username is taken.';
+        return 'This username is taken';
     }
 
     return null;
 }
 
-function validatePassword(string &$password): ?string {
+function validatePassword(string $password): ?string {
 
     if (strlen($password) < 8) {
-        return 'Password must be at least 8 characters long.';
+        return 'Password must be at least 8 characters long';
     }
 
     if (strlen($password) > 64) {
-        return 'Password cannot be longer than 64 characters.';
+        return 'Password cannot be longer than 64 characters';
     }
 
     if (preg_match('/\s/', $password)) {
-        return 'Password cannot contain spaces.';
+        return 'Password cannot contain spaces';
     }
 
-    if (!preg_match('/[A-Z]/i', $password)) {
-        return 'Password must include at least one letter.';
-    }
-
-    if (!preg_match('/\d/', $password)) {
-        return 'Password must include at least one number.';
-    }
-
-    if (!preg_match('/[\W_]/', $password)) {
-        return 'Password must include at least one special character.';
+    if (
+        !preg_match('/[A-Z]/i', $password) ||
+        !preg_match('/\d/', $password) ||
+        !preg_match('/[\W_]/', $password)
+    ) {
+        return 'Password must include at least one letter, one number, and one special character';
     }
 
     return null;
@@ -72,11 +68,11 @@ function validateName(string $name, string $label): ?string {
     }
 
     if (strlen($name) < 3 || strlen($name) > 50) {
-        return "$label must be between 3 and 50 characters.";
+        return "$label must be between 3 and 50 characters";
     }
 
     if (!preg_match('/^[a-zA-Z\s]+$/', $name)) {
-        return "$label can only contain letters and spaces.";
+        return "$label can only contain letters and spaces";
     }
 
     return null;
@@ -90,15 +86,17 @@ function cleanName(string $name): string {
 }
 
 function validatePhoneNumber(string $phone): ?string {
-    // remove all non-digits
+    // Remove all non-digit characters
     $stripped = preg_replace('/\D/', '', $phone);
 
-    if ($stripped === '') {
-        return null;
+    // If user typed something, but it has no digits at all
+    if ($phone !== '' && $stripped === '') {
+        return "Phone number must contain numeric digits";
     }
 
-    if (strlen($stripped) < 10 || strlen($stripped) > 15) {
-        return "Phone number must contain 10 to 15 digits.";
+    // If there are digits but too few or too many
+    if ($stripped !== '' && (strlen($stripped) < 10 || strlen($stripped) > 15)) {
+        return "Phone number must contain 10 to 15 digits";
     }
 
     return null;

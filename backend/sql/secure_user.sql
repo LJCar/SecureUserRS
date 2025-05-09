@@ -12,10 +12,5 @@ CREATE TABLE users (
                        phone_number VARCHAR(20),
                        email VARCHAR(100) NOT NULL UNIQUE,
                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                           CHECK (
-                               (account_type = 'Individual' AND full_name IS NOT NULL)
-                                   OR
-                               (account_type = 'Company' AND contact_name IS NOT NULL AND job_title IS NOT NULL)
-                               )
 );
 

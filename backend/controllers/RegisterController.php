@@ -20,10 +20,29 @@ class RegisterController
 
     public function register(array $data): array
     {
+        $data = array_map('trim', array_merge([
+            'account_type' => '',
+            'username' => '',
+            'email' => '',
+            'password' => '',
+            'password_confirm' => '',
+            'full_name' => '',
+            'contact_name' => '',
+            'job_title' => '',
+            'phone_number' => ''
+        ], $data));
+
+        foreach (['contact_name', 'job_title', 'full_name'] as $field) {
+            if ($data[$field] === '') {
+                $data[$field] = null;
+            }
+        }
+
         $errors = [
             'username' => '',
             'email' => '',
             'password' => '',
+            'password_confirm' => '',
             'account_type' => '',
             'full_name' => '',
             'contact_name' => '',
@@ -37,29 +56,39 @@ class RegisterController
             $errors['username'] = $usernameError;
         } elseif ($this->repo->usernameExists($data['username'])) {
             $errors['username'] = 'Username already exists';
-        } else {
-            $data['username'] = trim($data['username']);
         }
 
         // Email validation
-        if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+        if ($data['email'] === '') {
+            $errors['email'] = 'Email is required';
+        } elseif (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
             $errors['email'] = 'Invalid email format';
         } elseif ($this->repo->emailExists($data['email'])) {
             $errors['email'] = 'Email already exists';
         } else {
-            $data['email'] = strtolower(trim($data['email']));
+            $data['email'] = strtolower($data['email']);
         }
 
         //Password validation
-        $passwordError = validatePassword($data['password']);
-        if ($passwordError) {
-            $errors['password'] = $passwordError;
+        if ($data['password'] === '') {
+            $errors['password'] = 'Password is required';
+        } else {
+            $passwordError = validatePassword($data['password']);
+            if ($passwordError) {
+                $errors['password'] = $passwordError;
+            }
+        }
+        //Password confirm validation
+        if ($data['password_confirm'] === '') {
+            $errors['password_confirm'] = 'Please confirm your password';
+        } elseif ($data['password'] !== $data['password_confirm']) {
+            $errors['password_confirm'] = 'Passwords do not match';
         }
 
         // Account type validation
-        if (!in_array($data['accountType'], ['Individual', 'Company'])) {
-            $errors['account_type'] = 'Please select a valid account type.';
-        } elseif ($data['accountType'] === 'Individual') {
+        if (!in_array($data['account_type'], ['Individual', 'Company'])) {
+            $errors['account_type'] = 'Please select a valid account type';
+        } elseif ($data['account_type'] === 'Individual') {
             // Validate full name
             $fullNameError = validateName($data['full_name'], 'Full Name');
             if ($fullNameError) {
@@ -67,7 +96,7 @@ class RegisterController
             } else {
                 $data['full_name'] = cleanName($data['full_name']);
             }
-        } elseif ($data['accountType'] === 'Company') {
+        } elseif ($data['account_type'] === 'Company') {
             // Validate contact name
             $contactNameError = validateName($data['contact_name'], 'Contact Name');
             if ($contactNameError) {
@@ -94,7 +123,7 @@ class RegisterController
             $data['phone_number'] = $stripped !== '' ? $stripped : null;
         }
 
-        if (!empty($errors)) {
+        if (array_filter($errors)) {
             return ['success' => false, 'errors' => $errors];
         }
 
@@ -102,6 +131,6 @@ class RegisterController
         $user = new User($data);
         $success = $this->repo->save($user);
 
-        return ['success' => $success, 'errors' => $success ? [] : ['Failed to save user']];
+        return ['success' => $success, 'errors' => $success ? [] : ['general' => 'Failed to save user']];
     }
 }
