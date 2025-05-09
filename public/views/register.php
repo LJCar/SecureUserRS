@@ -1,3 +1,8 @@
+<?php
+require_once __DIR__ . '/../../backend/helpers/csrf.php';
+$csrf_token = get_csrf_token();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,6 +16,8 @@
     <h2>User Registration</h2>
 
     <form id="register-form">
+
+        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
 
         <!-- Account Type -->
         <div class="form-group">
