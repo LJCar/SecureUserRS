@@ -60,7 +60,10 @@ function validatePassword(string $password): ?string {
     return null;
 }
 
-function validateName(string $name, string $label): ?string {
+function validateName(?string $name, string $label): ?string {
+    if (is_null($name)){
+        return "$label is required.";
+    }
     $name = trim($name);
 
     if ($name === '') {
